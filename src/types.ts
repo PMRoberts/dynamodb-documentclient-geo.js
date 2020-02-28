@@ -13,15 +13,12 @@ export interface GeoQueryInput {
 export interface GeoQueryOutput extends DynamoDB.QueryOutput {
 }
 export interface GetPointInput {
-  RangeKeyValue: DynamoDB.AttributeValue;
   GeoPoint: GeoPoint;
   GetItemInput: DynamoDB.GetItemInput;
 }
 export interface GetPointOutput extends DynamoDB.GetItemOutput {
 }
 export interface PutPointInput {
-  RangeKeyValue: DynamoDB.AttributeValue;
-  Key: DynamoDB.Key,
   GeoPoint: GeoPoint;
   PutItemInput: DynamoDB.PutRequest;
 }
@@ -40,7 +37,6 @@ export interface QueryRectangleInput extends GeoQueryInput {
 export interface QueryRectangleOutput extends GeoQueryOutput {
 }
 export interface UpdatePointInput {
-  //RangeKeyValue: DynamoDB.AttributeValue;
   Key: DynamoDB.Key,
   GeoPoint: GeoPoint;
   UpdateItemInput: DynamoDB.UpdateItemInput;

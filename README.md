@@ -84,7 +84,6 @@ ddb.createTable(createTableInput).promise()
 ## Adding data
 ```js
 myGeoTableManager.putPoint({
-        RangeKeyValue: { S: '1234' }, // Use this to ensure uniqueness of the hash/range pairs.
         GeoPoint: { // An object specifying latitutde and longitude as plain numbers. Used to build the geohash, the hashkey and geojson data
             latitude: 51.51,
             longitude: -0.13
@@ -108,7 +107,7 @@ You must specify a `RangeKeyValue`, a `GeoPoint`, and an `UpdateItemInput` match
 
 ```js
 myGeoTableManager.updatePoint({
-        RangeKeyValue: { S: '1234' },
+        Key: { id: { S: '1234' } },
         GeoPoint: { // An object specifying latitutde and longitude as plain numbers.
             latitude: 51.51,
             longitude: -0.13
@@ -118,25 +117,6 @@ myGeoTableManager.updatePoint({
             ExpressionAttributeValues: {
                 ':newName': { S: 'United Kingdom'}
             }
-        }
-    }).promise()
-    .then(function() { console.log('Done!') });
-```
-
-## Deleting a specific point
-You must specify a `RangeKeyValue` and a `GeoPoint`. Optionally, you can pass `DeleteItemInput` matching [DynamoDB DeleteItem][deleteitem] request (`TableName` and `Key` are filled in for you).
-
-```js
-myGeoTableManager.deletePoint({
-        RangeKeyValue: { S: '1234' },
-        GeoPoint: { // An object specifying latitutde and longitude as plain numbers.
-            latitude: 51.51,
-            longitude: -0.13
-        },
-        DeleteItemInput: { // Optional, any additional parameters to pass through.
-            // TableName and Key are filled in for you
-            // Example: Only delete if the point does not have a country name set
-            ConditionExpression: 'attribute_not_exists(country)'
         }
     }).promise()
     .then(function() { console.log('Done!') });

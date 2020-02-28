@@ -37,7 +37,6 @@ ddb.createTable(createTableInput).promise()
         const data = require('./capitals.json');
         const putPointInputs = data.map(function (capital) {
             return {
-                RangeKeyValue: { S: uuid.v4() }, // Use this to ensure uniqueness of the hash/range pairs.
                 GeoPoint: {
                     latitude: capital.latitude,
                     longitude: capital.longitude
