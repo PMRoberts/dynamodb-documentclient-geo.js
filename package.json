@@ -4,6 +4,7 @@
   "description": "A javascript port of awslabs/dynamodb-geo, for dynamodb geospatial querying",
   "scripts": {
     "prepublish": "tsc -d",
+    "prepare": "npm run build",
     "clean": "rm -rf dist",
     "build": "tsc -d",
     "test": "mocha --require ts-node/register test/**/*.ts"
