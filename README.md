@@ -214,9 +214,6 @@ The name of the attribute storing the first `hashKeyLength` digits (default 2) o
 #### hashKeyLength: number = 2
 See [above][choosing-hashkeylength].
 
-#### rangeKeyAttributeName: string = "rangeKey"
-The name of the attribute storing the range key, used as the range (aka sort) part of a [hash/range key primary key pair][hashrange]. Its value must be specified by you (hash-range pairs must be unique).
-
 #### geoJsonAttributeName: string = "geoJson"
 The name of the attribute which will contain the longitude/latitude pair in a GeoJSON-style point (see also `longitudeFirst`).
 

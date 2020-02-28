@@ -18,12 +18,8 @@ import { DynamoDBManager } from "./dynamodb/DynamoDBManager";
 import { GeoDataManagerConfiguration } from "./GeoDataManagerConfiguration";
 import {
   BatchWritePointOutput,
-  DeletePointInput,
-  DeletePointOutput,
   GeoPoint,
   GeoQueryInput,
-  GetPointInput,
-  GetPointOutput,
   PutPointInput,
   PutPointOutput,
   QueryRadiusInput,
@@ -147,31 +143,6 @@ export class GeoDataManager {
 
   /**
    * <p>
-   * Get a point from the Amazon DynamoDB table.
-   * </p>
-   * <b>Sample usage:</b>
-   *
-   * <pre>
-   * GeoPoint geoPoint = new GeoPoint(47.5, -122.3);
-   * AttributeValue rangeKeyValue = new AttributeValue().withS(&quot;a6feb446-c7f2-4b48-9b3a-0f87744a5047&quot;);
-   *
-   * GetPointRequest getPointRequest = new GetPointRequest(geoPoint, rangeKeyValue);
-   * GetPointResult getPointResult = geoIndexManager.getPoint(getPointRequest);
-   *
-   * System.out.println(&quot;item: &quot; + getPointResult.getGetItemResult().getItem());
-   * </pre>
-   *
-   * @param getPointInput
-   *            Container for the necessary parameters to execute get point request.
-   *
-   * @return Result of get point request.
-   * */
-  public getPoint(getPointInput: GetPointInput): Request<GetPointOutput, AWSError> {
-    return this.dynamoDBManager.getPoint(getPointInput);
-  }
-
-  /**
-   * <p>
    * Query a rectangular area constructed by two points and return all points within the area. Two points need to
    * construct a rectangle from minimum and maximum latitudes and longitudes. If minPoint.getLongitude() >
    * maxPoint.getLongitude(), the rectangle spans the 180 degree longitude line.
@@ -266,31 +237,6 @@ export class GeoDataManager {
    */
   public updatePoint(updatePointInput: UpdatePointInput): Request<UpdatePointOutput, AWSError> {
     return this.dynamoDBManager.updatePoint(updatePointInput);
-  }
-
-  /**
-   * <p>
-   * Delete a point from the Amazon DynamoDB table.
-   * </p>
-   * <b>Sample usage:</b>
-   *
-   * <pre>
-   * GeoPoint geoPoint = new GeoPoint(47.5, -122.3);
-   *
-   * String rangeKey = &quot;a6feb446-c7f2-4b48-9b3a-0f87744a5047&quot;;
-   * AttributeValue rangeKeyValue = new AttributeValue().withS(rangeKey);
-   *
-   * DeletePointRequest deletePointRequest = new DeletePointRequest(geoPoint, rangeKeyValue);
-   * DeletePointResult deletePointResult = geoIndexManager.deletePoint(deletePointRequest);
-   * </pre>
-   *
-   * @param deletePointInput
-   *            Container for the necessary parameters to execute delete point request.
-   *
-   * @return Result of delete point request.
-   */
-  public deletePoint(deletePointInput: DeletePointInput): Request<DeletePointOutput, AWSError> {
-    return this.dynamoDBManager.deletePoint(deletePointInput);
   }
 
   /**

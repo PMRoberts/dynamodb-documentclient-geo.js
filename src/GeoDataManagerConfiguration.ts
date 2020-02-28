@@ -26,7 +26,6 @@ export class GeoDataManagerConfiguration {
   consistentRead: boolean = false;
 
   hashKeyAttributeName: string = "hashKey";
-  rangeKeyAttributeName: string = "rangeKey";
   geohashAttributeName: string = "geohash";
   geoJsonAttributeName: string = "geoJson";
 

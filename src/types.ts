@@ -3,14 +3,6 @@ import { DynamoDB } from "aws-sdk";
 export interface BatchWritePointOutput extends DynamoDB.BatchWriteItemOutput {
 }
 
-export interface DeletePointInput {
-  RangeKeyValue: DynamoDB.AttributeValue;
-  GeoPoint: GeoPoint;
-  DeleteItemInput?: DynamoDB.DeleteItemInput
-}
-export interface DeletePointOutput extends DynamoDB.DeleteItemOutput {
-}
-
 export interface GeoPoint {
   latitude: number;
   longitude: number;
@@ -29,6 +21,7 @@ export interface GetPointOutput extends DynamoDB.GetItemOutput {
 }
 export interface PutPointInput {
   RangeKeyValue: DynamoDB.AttributeValue;
+  Key: DynamoDB.Key,
   GeoPoint: GeoPoint;
   PutItemInput: DynamoDB.PutRequest;
 }
