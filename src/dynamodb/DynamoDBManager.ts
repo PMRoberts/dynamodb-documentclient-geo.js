@@ -29,7 +29,8 @@ import {
 import { S2Manager } from "../s2/S2Manager";
 import { GeohashRange } from "../model/GeohashRange";
 import * as Long from "long";
-import { PutItemInput, PutRequest } from "aws-sdk/clients/dynamodb";
+import { PutItemInput, PutRequest, UpdateItemInput } from "aws-sdk/clients/dynamodb";
+import { GeoPoint } from "../types";
 
 export class DynamoDBManager {
   private config: GeoDataManagerConfiguration;
@@ -104,6 +105,23 @@ export class DynamoDBManager {
     return this.config.dynamoDBClient.getItem(getItemInput);
   }
 
+  public buildPoint(geoPoint: GeoPoint) {
+    const geohash = S2Manager.generateGeohash(geoPoint);
+    const hashKey = S2Manager.generateHashKey(geohash, this.config.hashKeyLength);
+    const item = {};
+    item[this.config.hashKeyAttributeName] = { N: hashKey.toString(10) };
+    item[this.config.geohashAttributeName] = { N: geohash.toString(10) };
+    item[this.config.geoJsonAttributeName] = {
+      S: JSON.stringify({
+        type: this.config.geoJsonPointType,
+        coordinates: (this.config.longitudeFirst ?
+          [geoPoint.longitude, geoPoint.latitude] :
+          [geoPoint.latitude, geoPoint.longitude])
+      })
+    };
+    return item;
+  }
+
   public putPoint(putPointInput: PutPointInput): Request<PutPointOutput, AWSError> {
     const geohash = S2Manager.generateGeohash(putPointInput.GeoPoint);
     const hashKey = S2Manager.generateHashKey(geohash, this.config.hashKeyLength);
@@ -164,25 +182,20 @@ export class DynamoDBManager {
   }
 
   public updatePoint(updatePointInput: UpdatePointInput): Request<UpdatePointOutput, AWSError> {
-    const geohash = S2Manager.generateGeohash(updatePointInput.GeoPoint);
-    const hashKey = S2Manager.generateHashKey(geohash, this.config.hashKeyLength);
-
-    updatePointInput.UpdateItemInput.TableName = this.config.tableName;
-
-    if (!updatePointInput.UpdateItemInput.Key) {
-      updatePointInput.UpdateItemInput.Key = {};
-    }
-
-    updatePointInput.UpdateItemInput.Key[this.config.hashKeyAttributeName] = { N: hashKey.toString(10) };
-    updatePointInput.UpdateItemInput.Key[this.config.rangeKeyAttributeName] = updatePointInput.RangeKeyValue;
-
-    // Geohash and geoJson cannot be updated.
-    if (updatePointInput.UpdateItemInput.AttributeUpdates) {
-      delete updatePointInput.UpdateItemInput.AttributeUpdates[this.config.geohashAttributeName];
-      delete updatePointInput.UpdateItemInput.AttributeUpdates[this.config.geoJsonAttributeName];
-    }
-
-    return this.config.dynamoDBClient.updateItem(updatePointInput.UpdateItemInput);
+    const pointData = this.buildPoint(updatePointInput.GeoPoint);
+    const updateItemInput: UpdateItemInput = {
+      TableName: this.config.tableName,
+      Key: updatePointInput.Key,
+      UpdateExpression: `SET ${this.config.hashKeyAttributeName} = :newHashKey,
+          ${this.config.geohashAttributeName} = :newGeoHash,
+          ${this.config.geoJsonAttributeName} = :newGeoJson`,
+      ExpressionAttributeValues: {
+        ':newHashKey' : pointData[this.config.hashKeyAttributeName],
+        ':newGeoHash' : pointData[this.config.geohashAttributeName],
+        ':newGeoJson' : pointData[this.config.geoJsonAttributeName]
+      }
+    };
+    return this.config.dynamoDBClient.updateItem(updateItemInput);
   }
 
   public deletePoint(deletePointInput: DeletePointInput): Request<DeletePointOutput, AWSError> {

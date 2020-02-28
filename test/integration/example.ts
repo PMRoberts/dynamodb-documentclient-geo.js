@@ -8,7 +8,7 @@ AWS.config.update({
   region: 'eu-west-1'
 });
 
-describe('Example', function () {
+xdescribe('Example', function () {
   // Use a local DB for the example.
   const ddb = new AWS.DynamoDB({ endpoint: 'http://127.0.0.1:8000' });
 
