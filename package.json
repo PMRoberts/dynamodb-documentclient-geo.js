@@ -1,6 +1,6 @@
 {
   "name": "dynamodb-geo",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A javascript port of awslabs/dynamodb-geo, for dynamodb geospatial querying",
   "scripts": {
     "prepublish": "tsc -d",
@@ -23,13 +23,13 @@
     "@types/chai": "4.0.0",
     "@types/mocha": "2.2.41",
     "@types/node": "7.0.27",
-    "aws-sdk": "2.248.1",
+    "aws-sdk": "2.624.0",
     "chai": "4.0.1",
     "mocha": "3.3.0",
     "ts-node": "3.0.2",
     "typescript": "2.3.4"
   },
   "peerDependencies": {
-    "aws-sdk": "2.628.0"
+    "aws-sdk": "2.624.0"
   }
 }
