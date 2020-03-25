@@ -17,10 +17,6 @@ import { GeoDataManagerConfiguration } from "../GeoDataManagerConfiguration";
 import { AWSError, DynamoDB, Request } from "aws-sdk";
 import {
   BatchWritePointOutput,
-  DeletePointInput,
-  DeletePointOutput,
-  GetPointInput,
-  GetPointOutput,
   PutPointInput,
   PutPointOutput,
   UpdatePointInput,
@@ -29,7 +25,8 @@ import {
 import { S2Manager } from "../s2/S2Manager";
 import { GeohashRange } from "../model/GeohashRange";
 import * as Long from "long";
-
+import { PutItemInput, PutRequest, UpdateItemInput } from "aws-sdk/clients/dynamodb";
+import { GeoPoint } from "../types";
 
 export class DynamoDBManager {
   private config: GeoDataManagerConfiguration;
@@ -75,7 +72,8 @@ export class DynamoDBManager {
         IndexName: this.config.geohashIndexName,
         ConsistentRead: this.config.consistentRead,
         ReturnConsumedCapacity: "TOTAL",
-        ExclusiveStartKey: lastEvaluatedKey
+        ExclusiveStartKey: lastEvaluatedKey,
+        ProjectionExpression: this.config.projectionExpression
       };
 
       const queryOutput = await this.config.documentClient.query({ ...defaults, ...queryInput }).promise();
@@ -89,19 +87,19 @@ export class DynamoDBManager {
     return queryOutputs;
   }
 
-  public getPoint(getPointInput: GetPointInput): Request<GetPointOutput, AWSError> {
-    const geohash = S2Manager.generateGeohash(getPointInput.GeoPoint);
+  public buildPoint(geoPoint: GeoPoint) {
+    const geohash = S2Manager.generateGeohash(geoPoint);
     const hashKey = S2Manager.generateHashKey(geohash, this.config.hashKeyLength);
-
-    const getItemInput = getPointInput.GetItemInput;
-    getItemInput.TableName = this.config.tableName;
-
-    getItemInput.Key = {
-      [this.config.hashKeyAttributeName]: parseFloat(hashKey.toString(10)),
-      [this.config.rangeKeyAttributeName]: getPointInput.RangeKeyValue
-    };
-
-    return this.config.documentClient.get(getItemInput);
+    const item = {};
+    item[this.config.hashKeyAttributeName] = parseFloat(hashKey.toString(10));
+    item[this.config.geohashAttributeName] = parseFloat(geohash.toString(10));
+    item[this.config.geoJsonAttributeName] = JSON.stringify({
+        type: this.config.geoJsonPointType,
+        coordinates: (this.config.longitudeFirst ?
+          [geoPoint.longitude, geoPoint.latitude] :
+          [geoPoint.latitude, geoPoint.longitude])
+      });
+    return item;
   }
 
   public putPoint(putPointInput: PutPointInput): Request<PutPointOutput, AWSError> {
@@ -114,7 +112,6 @@ export class DynamoDBManager {
     };
 
     putItemInput.Item[this.config.hashKeyAttributeName] = parseFloat(hashKey.toString(10));
-    putItemInput.Item[this.config.rangeKeyAttributeName] = putPointInput.RangeKeyValue;
     putItemInput.Item[this.config.geohashAttributeName] = parseFloat(geohash.toString(10));
     putItemInput.Item[this.config.geoJsonAttributeName] = JSON.stringify({
         type: this.config.geoJsonPointType,
@@ -140,7 +137,6 @@ export class DynamoDBManager {
       };
 
       putRequest.Item[this.config.hashKeyAttributeName] = parseFloat(hashKey.toString(10));
-      putRequest.Item[this.config.rangeKeyAttributeName] = putPointInput.RangeKeyValue;
       putRequest.Item[this.config.geohashAttributeName] = parseFloat(geohash.toString(10));
       putRequest.Item[this.config.geoJsonAttributeName] = JSON.stringify({
           type: this.config.geoJsonPointType,
@@ -159,38 +155,20 @@ export class DynamoDBManager {
   }
 
   public updatePoint(updatePointInput: UpdatePointInput): Request<UpdatePointOutput, AWSError> {
-    const geohash = S2Manager.generateGeohash(updatePointInput.GeoPoint);
-    const hashKey = S2Manager.generateHashKey(geohash, this.config.hashKeyLength);
-
-    updatePointInput.UpdateItemInput.TableName = this.config.tableName;
-
-    if (!updatePointInput.UpdateItemInput.Key) {
-      updatePointInput.UpdateItemInput.Key = {};
-    }
-
-    updatePointInput.UpdateItemInput.Key[this.config.hashKeyAttributeName] = parseFloat(hashKey.toString(10));
-    updatePointInput.UpdateItemInput.Key[this.config.rangeKeyAttributeName] = updatePointInput.RangeKeyValue;
-
-    // Geohash and geoJson cannot be updated.
-    if (updatePointInput.UpdateItemInput.AttributeUpdates) {
-      delete updatePointInput.UpdateItemInput.AttributeUpdates[this.config.geohashAttributeName];
-      delete updatePointInput.UpdateItemInput.AttributeUpdates[this.config.geoJsonAttributeName];
-    }
-
-    return this.config.documentClient.update(updatePointInput.UpdateItemInput);
-  }
-
-  public deletePoint(deletePointInput: DeletePointInput): Request<DeletePointOutput, AWSError> {
-    const geohash = S2Manager.generateGeohash(deletePointInput.GeoPoint);
-    const hashKey = S2Manager.generateHashKey(geohash, this.config.hashKeyLength);
-
-    return this.config.documentClient.delete({
-      ...deletePointInput.DeleteItemInput,
+    const pointData = this.buildPoint(updatePointInput.GeoPoint);
+    const updateItemInput: UpdateItemInput = {
       TableName: this.config.tableName,
-      Key: {
-        [this.config.hashKeyAttributeName]: parseFloat(hashKey.toString(10)),
-        [this.config.rangeKeyAttributeName]: deletePointInput.RangeKeyValue
+      Key: updatePointInput.Key,
+      UpdateExpression: `SET ${this.config.hashKeyAttributeName} = :newHashKey,
+          ${this.config.geohashAttributeName} = :newGeoHash,
+          ${this.config.geoJsonAttributeName} = :newGeoJson`,
+      ExpressionAttributeValues: {
+        ':newHashKey' : pointData[this.config.hashKeyAttributeName],
+        ':newGeoHash' : pointData[this.config.geohashAttributeName],
+        ':newGeoJson' : pointData[this.config.geoJsonAttributeName]
       }
-    });
+    };
+    return this.config.documentClient.update(updateItemInput);
   }
+
 }

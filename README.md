@@ -97,7 +97,6 @@ ddb.createTable(createTableInput).promise()
 ## Adding data
 ```js
 myGeoTableManager.putPoint({
-        RangeKeyValue: '1234', // Use this to ensure uniqueness of the hash/range pairs.
         GeoPoint: { // An object specifying latitutde and longitude as plain numbers. Used to build the geohash, the hashkey and geojson data
             latitude: 51.51,
             longitude: -0.13
@@ -121,7 +120,7 @@ You must specify a `RangeKeyValue`, a `GeoPoint`, and an `UpdateItemInput` match
 
 ```js
 myGeoTableManager.updatePoint({
-        RangeKeyValue: '1234',
+        Key: { id: { S: '1234' } },
         GeoPoint: { // An object specifying latitutde and longitude as plain numbers.
             latitude: 51.51,
             longitude: -0.13
@@ -131,25 +130,6 @@ myGeoTableManager.updatePoint({
             ExpressionAttributeValues: {
                 ':newName': 'United Kingdom'
             }
-        }
-    }).promise()
-    .then(function() { console.log('Done!') });
-```
-
-## Deleting a specific point
-You must specify a `RangeKeyValue` and a `GeoPoint`. Optionally, you can pass `DeleteItemInput` matching [DynamoDB DocumentClient Delete][delete] request (`TableName` and `Key` are filled in for you).
-
-```js
-myGeoTableManager.deletePoint({
-        RangeKeyValue: '1234',
-        GeoPoint: { // An object specifying latitutde and longitude as plain numbers.
-            latitude: 51.51,
-            longitude: -0.13
-        },
-        DeleteItemInput: { // Optional, any additional parameters to pass through.
-            // TableName and Key are filled in for you
-            // Example: Only delete if the point does not have a country name set
-            ConditionExpression: 'attribute_not_exists(country)'
         }
     }).promise()
     .then(function() { console.log('Done!') });
@@ -226,9 +206,6 @@ The name of the attribute storing the first `hashKeyLength` digits (default 2) o
 
 #### hashKeyLength: number = 2
 See [above][choosing-hashkeylength].
-
-#### rangeKeyAttributeName: string = "rangeKey"
-The name of the attribute storing the range key, used as the range (aka sort) part of a [hash/range key primary key pair][hashrange]. Its value must be specified by you (hash-range pairs must be unique).
 
 #### geoJsonAttributeName: string = "geoJson"
 The name of the attribute which will contain the longitude/latitude pair in a GeoJSON-style point (see also `longitudeFirst`).
