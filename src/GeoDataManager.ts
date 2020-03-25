@@ -279,7 +279,6 @@ export class GeoDataManager {
 
 
     return list.filter(item => {
-      delete item[this.config.geohashAttributeName];
       const geoJson: string = item[this.config.geoJsonAttributeName];
       const coordinates = JSON.parse(geoJson).coordinates;
       const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
@@ -301,7 +300,6 @@ export class GeoDataManager {
     const latLngRect: S2LatLngRect = S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
 
     return list.filter(item => {
-      delete item[this.config.geohashAttributeName];
       const geoJson: string = item[this.config.geoJsonAttributeName];
       const coordinates = JSON.parse(geoJson).coordinates;
       const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
