@@ -26,11 +26,12 @@ export class GeoDataManagerConfiguration {
   consistentRead: boolean = false;
 
   hashKeyAttributeName: string = "hashKey";
-  rangeKeyAttributeName: string = "rangeKey";
   geohashAttributeName: string = "geohash";
   geoJsonAttributeName: string = "geoJson";
 
   geohashIndexName: string = "geohash-index";
+
+  projectionExpression: string = null;
 
   hashKeyLength: number = 2;
 
