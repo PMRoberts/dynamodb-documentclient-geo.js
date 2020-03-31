@@ -27,35 +27,13 @@ export class GeoDataManagerConfiguration {
 
   hashKeyAttributeName: string = "hashKey";
   geohashAttributeName: string = "geohash";
-  geoJsonAttributeName: string = "geoJson";
+  coordinatesAttributeName: string = "coordinates";
 
   geohashIndexName: string = "geohash-index";
 
   projectionExpression: string = null;
 
   hashKeyLength: number = 2;
-
-  /**
-   * The order of the GeoJSON coordinate pair in data.
-   * Use false [lat, lon] for compatibility with the Java library https://github.com/awslabs/dynamodb-geo
-   * Use true [lon, lat] for GeoJSON standard compliance. (default)
-   *
-   * Note that this value should match the state of your existing data - if you change it you must update your database manually
-   *
-   * @type {boolean}
-   */
-  longitudeFirst: boolean = true;
-
-  /**
-   * The value of the 'type' attribute in recorded GeoJSON points. Should normally be 'Point', which is standards compliant.
-   *
-   * Use 'POINT' for compatibility with the Java library https://github.com/awslabs/dynamodb-geo
-   *
-   * This setting is only relevant for writes. This library doesn't inspect or set this value when reading/querying.
-   *
-   * @type {string}
-   */
-  geoJsonPointType: 'Point' | 'POINT' = 'Point';
 
   documentClient: DynamoDB.DocumentClient;
 

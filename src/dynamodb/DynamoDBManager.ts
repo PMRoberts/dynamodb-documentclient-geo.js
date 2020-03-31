@@ -93,12 +93,10 @@ export class DynamoDBManager {
     const item = {};
     item[this.config.hashKeyAttributeName] = parseFloat(hashKey.toString(10));
     item[this.config.geohashAttributeName] = parseFloat(geohash.toString(10));
-    item[this.config.geoJsonAttributeName] = JSON.stringify({
-        type: this.config.geoJsonPointType,
-        coordinates: (this.config.longitudeFirst ?
-          [geoPoint.longitude, geoPoint.latitude] :
-          [geoPoint.latitude, geoPoint.longitude])
-      });
+    item[this.config.coordinatesAttributeName] = {
+      latitude: geoPoint.latitude,
+      longitude: geoPoint.longitude
+      };
     return item;
   }
 
@@ -113,13 +111,10 @@ export class DynamoDBManager {
 
     putItemInput.Item[this.config.hashKeyAttributeName] = parseFloat(hashKey.toString(10));
     putItemInput.Item[this.config.geohashAttributeName] = parseFloat(geohash.toString(10));
-    putItemInput.Item[this.config.geoJsonAttributeName] = JSON.stringify({
-        type: this.config.geoJsonPointType,
-        coordinates: (this.config.longitudeFirst ?
-          [putPointInput.GeoPoint.longitude, putPointInput.GeoPoint.latitude] :
-          [putPointInput.GeoPoint.latitude, putPointInput.GeoPoint.longitude])
-      });
-
+    putItemInput.Item[this.config.coordinatesAttributeName] = {
+      latitude: putPointInput.GeoPoint.latitude,
+      longitude: putPointInput.GeoPoint.longitude
+      };
     return this.config.documentClient.put(putItemInput);
   }
 
@@ -138,12 +133,10 @@ export class DynamoDBManager {
 
       putRequest.Item[this.config.hashKeyAttributeName] = parseFloat(hashKey.toString(10));
       putRequest.Item[this.config.geohashAttributeName] = parseFloat(geohash.toString(10));
-      putRequest.Item[this.config.geoJsonAttributeName] = JSON.stringify({
-          type: this.config.geoJsonPointType,
-          coordinates: (this.config.longitudeFirst ?
-            [putPointInput.GeoPoint.longitude, putPointInput.GeoPoint.latitude] :
-            [putPointInput.GeoPoint.latitude, putPointInput.GeoPoint.longitude])
-        });
+      putRequest.Item[this.config.coordinatesAttributeName] = {
+        latitude: putPointInput.GeoPoint.latitude,
+        longitude: putPointInput.GeoPoint.longitude
+        };
       writeInputs.push({ PutRequest: putRequest });
     });
 
@@ -161,11 +154,11 @@ export class DynamoDBManager {
       Key: updatePointInput.Key,
       UpdateExpression: `SET ${this.config.hashKeyAttributeName} = :newHashKey,
           ${this.config.geohashAttributeName} = :newGeoHash,
-          ${this.config.geoJsonAttributeName} = :newGeoJson`,
+          ${this.config.coordinatesAttributeName} = :newCoordinates`,
       ExpressionAttributeValues: {
         ':newHashKey' : pointData[this.config.hashKeyAttributeName],
         ':newGeoHash' : pointData[this.config.geohashAttributeName],
-        ':newGeoJson' : pointData[this.config.geoJsonAttributeName]
+        ':newCoordinates' : pointData[this.config.coordinatesAttributeName]
       }
     };
     return this.config.documentClient.update(updateItemInput);

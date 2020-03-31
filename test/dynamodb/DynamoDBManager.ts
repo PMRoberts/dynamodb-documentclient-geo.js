@@ -11,7 +11,10 @@ describe('DynamoDBManager.putPoint', () => {
         expect(args).to.deep.equal({
             TableName: 'MyTable',
             Item: {
-              geoJson: "{\"type\":\"Point\",\"coordinates\":[-0.13,51.51]}",
+             coordinates:{
+                latitude: 51.51,
+                longitude: -0.13
+              },
               geohash: 5221366118452580119,
               hashKey: 52,
               country: 'UK',

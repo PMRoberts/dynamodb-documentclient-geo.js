@@ -279,10 +279,10 @@ export class GeoDataManager {
 
 
     return list.filter(item => {
-      const geoJson: string = item[this.config.geoJsonAttributeName];
-      const coordinates = JSON.parse(geoJson).coordinates;
-      const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
-      const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+      const coordinates = item[this.config.coordinatesAttributeName];
+      const latitude = coordinates.latitude;
+      const longitude = coordinates.longitude;
+
 
       const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
       return (centerLatLng.getEarthDistance(latLng) as any).toNumber() <= radiusInMeter;
@@ -300,10 +300,9 @@ export class GeoDataManager {
     const latLngRect: S2LatLngRect = S2Util.latLngRectFromQueryRectangleInput(geoQueryInput);
 
     return list.filter(item => {
-      const geoJson: string = item[this.config.geoJsonAttributeName];
-      const coordinates = JSON.parse(geoJson).coordinates;
-      const longitude = coordinates[this.config.longitudeFirst ? 0 : 1];
-      const latitude = coordinates[this.config.longitudeFirst ? 1 : 0];
+      const coordinates = item[this.config.coordinatesAttributeName];
+      const latitude = coordinates.latitude;
+      const longitude = coordinates.longitude;
 
       const latLng: S2LatLng = S2LatLng.fromDegrees(latitude, longitude);
       return latLngRect.containsLL(latLng);
